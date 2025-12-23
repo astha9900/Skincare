@@ -52,11 +52,11 @@ export function Footer() {
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4" />
-                swatikumari7255@gmail.com
+                asthaxX@gmail.com
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4" />
-                +91-8102065486
+                +91-XXXXXXXXXXX
               </li>
             </ul>
           </div>
