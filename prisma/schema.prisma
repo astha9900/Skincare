@@ -1,0 +1,294 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id             String          @id @default(cuid())
+  email          String          @unique
+  password       String
+  name           String
+  role           Role            @default(CUSTOMER)
+  vendorBrand    String?
+  phone          String?
+  avatar         String?
+  isActive       Boolean         @default(true)
+  addresses      Address[]
+  orders         Order[]
+  reviews        Review[]
+  wishlist       WishlistItem[]
+  products       Product[]       @relation("VendorProducts")
+  returnRequests ReturnRequest[]
+  skinWallet     SkinWallet?
+  profile        UserProfile?
+  referralCode   String?         @unique
+  referredBy     String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+enum Role {
+  ADMIN
+  VENDOR
+  CUSTOMER
+}
+
+model Product {
+  id                String         @id @default(cuid())
+  name              String
+  slug              String         @unique
+  brand             String
+  category          String
+  price             Float
+  originalPrice     Float?
+  discount          Int?
+  rating            Float          @default(0)
+  reviewCount       Int            @default(0)
+  image             String
+  images            String[]
+  description       String         @db.Text
+  ingredients       String         @db.Text
+  howToUse          String         @db.Text
+  inStock           Boolean        @default(true)
+  stockCount        Int            @default(100)
+  tags              String[]
+  suitableForSkin   String[]
+  suitableForHair   String[]
+  suitableForBody   String[]
+  targetConcerns    String[]
+  ageGroup          String[]
+  budgetTier        String         @default("mid")
+  vendorId          String?
+  vendor            User?          @relation("VendorProducts", fields: [vendorId], references: [id])
+  orderItems        OrderItem[]
+  reviews           Review[]
+  wishlist          WishlistItem[]
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@index([category])
+  @@index([brand])
+  @@index([budgetTier])
+}
+
+model Order {
+  id              String         @id @default(cuid())
+  orderNumber     String         @unique @default(cuid())
+  userId          String
+  user            User           @relation(fields: [userId], references: [id])
+  items           OrderItem[]
+  subtotal        Float
+  discountAmount  Float          @default(0)
+  couponCode      String?
+  walletDiscount  Float          @default(0)
+  shippingCost    Float          @default(0)
+  total           Float
+  status          OrderStatus    @default(PENDING)
+  paymentMethod   String
+  paymentStatus   String         @default("PENDING")
+  shippingAddress Json
+  trackingNumber  String?
+  returnRequest   ReturnRequest?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+model OrderItem {
+  id           String  @id @default(cuid())
+  orderId      String
+  order        Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId    String
+  product      Product @relation(fields: [productId], references: [id])
+  quantity     Int
+  price        Float
+  productName  String
+  productImage String
+}
+
+model Address {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  phone     String
+  line1     String
+  line2     String?
+  city      String
+  state     String
+  pincode   String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Review {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  rating       Int
+  title        String
+  body         String   @db.Text
+  helpfulCount Int      @default(0)
+  verified     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  @@unique([userId, productId])
+  @@index([productId])
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+}
+
+model Coupon {
+  id        String     @id @default(cuid())
+  code      String     @unique
+  type      CouponType
+  value     Float
+  minOrder  Float      @default(0)
+  maxUses   Int?
+  usedCount Int        @default(0)
+  expiresAt DateTime?
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+}
+
+enum CouponType {
+  PERCENTAGE
+  FIXED
+}
+
+// ─── Return / Exchange ────────────────────────────────────────────────────────
+
+model ReturnRequest {
+  id          String       @id @default(cuid())
+  orderId     String       @unique
+  order       Order        @relation(fields: [orderId], references: [id])
+  userId      String
+  user        User         @relation(fields: [userId], references: [id])
+  type        ReturnType
+  reason      String       @db.Text
+  items       Json
+  exchangeFor String?
+  status      ReturnStatus @default(PENDING)
+  adminNote   String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+enum ReturnType {
+  RETURN
+  EXCHANGE
+}
+
+enum ReturnStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+// ─── Skin Wallet ──────────────────────────────────────────────────────────────
+
+model SkinWallet {
+  id           String              @id @default(cuid())
+  userId       String              @unique
+  user         User                @relation(fields: [userId], references: [id])
+  balance      Float               @default(0)
+  transactions WalletTransaction[]
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+}
+
+model WalletTransaction {
+  id          String     @id @default(cuid())
+  walletId    String
+  wallet      SkinWallet @relation(fields: [walletId], references: [id])
+  amount      Float
+  type        String
+  description String
+  orderId     String?
+  createdAt   DateTime   @default(now())
+
+  @@index([walletId])
+}
+
+// ─── Skin Quiz / User Profile ─────────────────────────────────────────────────
+
+model UserProfile {
+  id           String       @id @default(cuid())
+  userId       String       @unique
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skinType     SkinType?
+  skinConcerns String[]
+  hairType     HairType?
+  hairConcerns String[]
+  bodyConcerns String[]
+  age          AgeRange?
+  budget       BudgetRange?
+  routine      RoutineLevel?
+  completedAt  DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+enum SkinType {
+  OILY
+  DRY
+  COMBINATION
+  SENSITIVE
+  NORMAL
+}
+
+enum HairType {
+  STRAIGHT
+  WAVY
+  CURLY
+  COILY
+}
+
+enum AgeRange {
+  TEENS
+  TWENTIES
+  THIRTIES
+  FORTIES
+  FIFTIES_PLUS
+}
+
+enum BudgetRange {
+  BUDGET
+  MID
+  PREMIUM
+  LUXURY
+}
+
+enum RoutineLevel {
+  MINIMAL
+  MODERATE
+  EXTENSIVE
+}

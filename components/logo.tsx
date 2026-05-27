@@ -1,0 +1,62 @@
+export function SkinGlowLogo({ size = 36, className }: { size?: number; className?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 40 40"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      role="img"
+      aria-label="SkinGlow logo"
+    >
+      <defs>
+        <radialGradient id="sg-bg" cx="15" cy="13" r="27" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#5bb87e" />
+          <stop offset="100%" stopColor="#1a5436" />
+        </radialGradient>
+        <linearGradient id="sg-leaf" x1="20" y1="8" x2="20" y2="30" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="100%" stopColor="#c4ebd6" />
+        </linearGradient>
+      </defs>
+
+      {/* Circle background */}
+      <circle cx="20" cy="20" r="19.5" fill="url(#sg-bg)" />
+
+      {/* Depth highlight — upper-left shimmer */}
+      <ellipse cx="13" cy="12" rx="9" ry="5.5" fill="white" opacity="0.1" />
+
+      {/* Subtle inner ring */}
+      <circle cx="20" cy="20" r="17.5" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="0.5" />
+
+      {/* Leaf / teardrop */}
+      <path d="M20 30 C8 26 8 12 20 8 C32 12 32 26 20 30 Z" fill="url(#sg-leaf)" />
+
+      {/* Stem */}
+      <line x1="20" y1="30" x2="20" y2="33.5" stroke="white" strokeWidth="1.6" strokeLinecap="round" opacity="0.7" />
+
+      {/* Center vein */}
+      <line x1="20" y1="10.5" x2="20" y2="28.5" stroke="#1a5436" strokeWidth="0.75" strokeLinecap="round" opacity="0.38" />
+
+      {/* Side veins */}
+      <path d="M20 15.5 L14.5 13" stroke="#1a5436" strokeWidth="0.6" strokeLinecap="round" opacity="0.28" />
+      <path d="M20 19.5 L15 18"   stroke="#1a5436" strokeWidth="0.6" strokeLinecap="round" opacity="0.28" />
+      <path d="M20 23 L16.5 22"   stroke="#1a5436" strokeWidth="0.6" strokeLinecap="round" opacity="0.28" />
+      <path d="M20 15.5 L25.5 13" stroke="#1a5436" strokeWidth="0.6" strokeLinecap="round" opacity="0.28" />
+      <path d="M20 19.5 L25 18"   stroke="#1a5436" strokeWidth="0.6" strokeLinecap="round" opacity="0.28" />
+      <path d="M20 23 L23.5 22"   stroke="#1a5436" strokeWidth="0.6" strokeLinecap="round" opacity="0.28" />
+
+      {/* 4-point sparkle star */}
+      <path
+        d="M29 6 L29.62 8.38 L32 9 L29.62 9.62 L29 12 L28.38 9.62 L26 9 L28.38 8.38 Z"
+        fill="#fff9c4"
+      />
+
+      {/* Small glow satellites */}
+      <circle cx="9" cy="11" r="1.1" fill="white" opacity="0.32" />
+      <circle cx="7" cy="17" r="0.65" fill="white" opacity="0.22" />
+      <circle cx="32" cy="27" r="0.8" fill="white" opacity="0.2" />
+    </svg>
+  )
+}
